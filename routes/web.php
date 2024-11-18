@@ -1,16 +1,27 @@
 <?php
-use App\Http\Controllers\Guest\PageController;
+use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Admin\OperatorController;
+use App\Http\Controllers\Admin\CategoryController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+// Route per autenticazione Admin (usiamo laravel/ui per login base)
+Auth::routes([
+    'register' => false, // Disabilitiamo la registrazione
+]);
 
-Route::get('/', [PageController::class, 'index'])->name('home');
+// Rotte protette dal middleware "auth" per l'Admin
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('admin.tickets.index');
+    });
+
+    // Rotte per i Ticket
+    Route::resource('tickets', TicketController::class);
+
+    // Rotte per gli Operatori
+    Route::resource('operators', OperatorController::class);
+
+    // Rotte per le Categorie
+    Route::resource('categories', CategoryController::class);
+});
+
