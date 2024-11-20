@@ -35,28 +35,38 @@ class TicketController extends Controller
     }
 
     public function assignOperator(Ticket $ticket, Request $request)
-    {
-        $request->validate([
-            'operator_id' => 'required|exists:operators,id',
-        ]);
+{
+    // Controlla se ci sono operatori disponibili
+    $availableOperators = Operator::where('is_available', true)->get();
 
-        $operator = Operator::findOrFail($request->operator_id);
-
-        if (!$operator->is_available) {
-            return back()->with('error', 'L\'operatore selezionato è già occupato.');
-        }
-
-        // Assegna l'operatore e aggiorna lo stato
-        $ticket->operator_id = $operator->id;
-        $ticket->status = 'IN_PROGRESS';  // Modifica stato a 'IN_PROGRESS'
-        $ticket->save();
-
-        // Imposta l'operatore come occupato
-        $operator->is_available = false;
-        $operator->save();
-
-        return redirect()->route('tickets.index')->with('success', 'Operatore assegnato con successo.');
+    // Se non ci sono operatori disponibili, mostra la modale
+    if ($availableOperators->isEmpty()) {
+        return back()->with('error', 'Non ci sono operatori disponibili al momento.'); // Mostra il messaggio d'errore
     }
+
+    // Altrimenti, continua con l'assegnazione dell'operatore
+    $request->validate([
+        'operator_id' => 'required|exists:operators,id',
+    ]);
+
+    $operator = Operator::findOrFail($request->operator_id);
+
+    if (!$operator->is_available) {
+        return back()->with('error', 'L\'operatore selezionato è già occupato.');
+    }
+
+    // Assegna l'operatore e aggiorna lo stato
+    $ticket->operator_id = $operator->id;
+    $ticket->status = 'IN_PROGRESS';  // Modifica stato a 'IN_PROGRESS'
+    $ticket->save();
+
+    // Imposta l'operatore come occupato
+    $operator->is_available = false;
+    $operator->save();
+
+    return redirect()->route('tickets.index')->with('success', 'Operatore assegnato con successo.');
+}
+
 
     public function updateStatus(Ticket $ticket, Request $request)
     {
