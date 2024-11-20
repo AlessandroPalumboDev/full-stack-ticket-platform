@@ -24,7 +24,7 @@
             <p><strong>ID:</strong> {{ $ticket->id }}</p>
             <p><strong>Titolo:</strong> {{ $ticket->title }}</p>
             <p><strong>Descrizione:</strong> {{ $ticket->description }}</p>
-            <p><strong>Categoria:</strong> {{ $ticket->category }}</p>
+            <p><strong>Categoria:</strong> {{ $ticket->category ? $ticket->category->name : 'N/A' }}</p>
             <p><strong>Stato:</strong> {{ $ticket->status }}</p>
 
             @if ($ticket->operator)
@@ -44,7 +44,7 @@
             <div class="form-group">
                 <label for="status">Aggiorna stato:</label>
                 <select name="status" id="status" class="form-control">
-                    <option value="NEW" {{ $ticket->status === 'NEW' ? 'selected' : '' }}>Nuovo</option>
+                    {{-- <option value="NEW" {{ $ticket->status === 'NEW' ? 'selected' : '' }}>Nuovo</option> --}}
                     <option value="IN_PROGRESS" {{ $ticket->status === 'IN_PROGRESS' ? 'selected' : '' }}>In corso</option>
                     <option value="CLOSED" {{ $ticket->status === 'CLOSED' ? 'selected' : '' }}>Chiuso</option>
                 </select>
