@@ -1,66 +1,84 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\Operator;
-use App\Models\Category;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = Ticket::with(['operator', 'category'])->paginate(10);
-        return view('admin.tickets.index', compact('tickets'));
-    }
+        $tickets = Ticket::query();
 
-    public function create()
-    {
-        $operators = Operator::all();
-        $categories = Category::all();
-        return view('admin.tickets.create', compact('operators', 'categories'));
-    }
+        // Filtri per stato e categoria
+        if ($request->has('status') && $request->status) {
+            $tickets->where('status', $request->status);
+        }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'operator_id' => 'required|exists:operators,id',
-            'category_id' => 'required|exists:categories,id',
+        if ($request->has('category') && $request->category) {
+            $tickets->where('category', $request->category);
+        }
+
+        return view('admin.tickets.index', [
+            'tickets' => $tickets->with('operator')->paginate(10),
+            'statuses' => ['NEW', 'IN_PROGRESS', 'CLOSED'],
+            'categories' => ['Bug', 'Feature', 'Support'],
         ]);
-
-        Ticket::create($request->all());
-        return redirect()->route('admin.tickets.index')->with('success', 'Ticket created successfully.');
     }
 
     public function show(Ticket $ticket)
     {
-        return view('admin.tickets.show', compact('ticket'));
+        return view('admin.tickets.show', compact('ticket'));  // Assicurati che la view sia corretta
     }
 
-    public function edit(Ticket $ticket)
-    {
-        $operators = Operator::all();
-        $categories = Category::all();
-        return view('admin.tickets.edit', compact('ticket', 'operators', 'categories'));
-    }
-
-    public function update(Request $request, Ticket $ticket)
+    public function assignOperator(Ticket $ticket, Request $request)
     {
         $request->validate([
-            'status' => 'required|in:ASSIGNED,IN_PROGRESS,CLOSED',
+            'operator_id' => 'required|exists:operators,id',
         ]);
 
-        $ticket->update($request->only('status'));
-        return redirect()->route('admin.tickets.index')->with('success', 'Ticket updated successfully.');
+        $operator = Operator::findOrFail($request->operator_id);
+
+        if (!$operator->is_available) {
+            return back()->with('error', 'L\'operatore selezionato è già occupato.');
+        }
+
+        // Assegna l'operatore e aggiorna lo stato
+        $ticket->operator_id = $operator->id;
+        $ticket->status = 'IN_PROGRESS';  // Modifica stato a 'IN_PROGRESS'
+        $ticket->save();
+
+        // Imposta l'operatore come occupato
+        $operator->is_available = false;
+        $operator->save();
+
+        return redirect()->route('tickets.index')->with('success', 'Operatore assegnato con successo.');
     }
 
-    public function destroy(Ticket $ticket)
+    public function updateStatus(Ticket $ticket, Request $request)
     {
-        $ticket->delete();
-        return redirect()->route('admin.tickets.index')->with('success', 'Ticket deleted successfully.');
+        // Validazione dello stato
+        $request->validate([
+            'status' => 'required|in:NEW,IN_PROGRESS,CLOSED',
+        ]);
+
+        // Aggiorna lo stato del ticket
+        $ticket->status = $request->status;
+
+        // Se il ticket è chiuso, imposta l'operatore come disponibile
+        if ($request->status === 'CLOSED' && $ticket->operator) {
+            $ticket->operator->is_available = true;
+            $ticket->operator->save();
+        }
+
+        // Salva il ticket con il nuovo stato
+        $ticket->save();
+
+        return redirect()->route('tickets.index')->with('success', 'Stato del ticket aggiornato con successo.');
     }
+
+    
 }

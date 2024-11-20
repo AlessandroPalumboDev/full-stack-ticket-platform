@@ -15,9 +15,9 @@ class OperatorSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             Operator::create([
                 'name' => $faker->name,
-                'email' => $faker->unique()->email,
+                'email' => $faker->unique()->safeEmail,
+                'is_available' => true, // Tutti gli operatori iniziano disponibili
             ]);
         }
     }
 }
-

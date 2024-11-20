@@ -1,39 +1,103 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>Tickets</h1>
-<a href="{{ route('admin.tickets.create') }}" class="btn btn-primary mb-3">Create Ticket</a>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Operator</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($tickets as $ticket)
-        <tr>
-            <td>{{ $ticket->id }}</td>
-            <td>{{ $ticket->title }}</td>
-            <td>{{ $ticket->operator->name }}</td>
-            <td>{{ $ticket->category->name }}</td>
-            <td>{{ $ticket->status }}</td>
-            <td>
-                <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-info btn-sm">View</a>
-                <a href="{{ route('admin.tickets.edit', $ticket) }}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="{{ route('admin.tickets.destroy', $ticket) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
-            </td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
-{{ $tickets->links() }}
+<div class="container">
+    <h1>Gestione Ticket</h1>
+
+    {{-- Filtri --}}
+    <form action="{{ route('tickets.index') }}" method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <select name="status" class="form-control" onchange="this.form.submit()">
+                    <option value="">Filtra per stato</option>
+                    @foreach ($statuses as $status)
+                        <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
+                            {{ $status }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="category" class="form-control" onchange="this.form.submit()">
+                    <option value="">Filtra per categoria</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category }}" {{ request('category') === $category ? 'selected' : '' }}>
+                            {{ $category }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </form>
+
+    {{-- Tabella Ticket --}}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ticket</th>
+                <th>Stato</th>
+                <th>Categoria</th>
+                <th>Operatore</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($tickets as $ticket)
+                <tr>
+                    <td>{{ $ticket->title }}</td>
+                    <td>{{ $ticket->status }}</td>
+                    <td>{{ $ticket->category }}</td>
+                    <td>{{ $ticket->operator ? $ticket->operator->name : 'Non assegnato' }}</td>
+                    <td>
+                        <a href="{{ route('tickets.show', $ticket) }}" class="btn btn-info btn-sm">Dettagli</a>
+                        <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#assignModal-{{ $ticket->id }}">
+                            Assegna Operatore
+                        </a>
+                        @if ($ticket->status !== 'CLOSED')
+                            <form action="{{ route('tickets.status.update', $ticket) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="CLOSED">
+                                <button type="submit" class="btn btn-warning btn-sm">Chiudi</button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    {{ $tickets->links() }}
+
+    {{-- Modale Assegna Operatore --}}
+    @foreach ($tickets as $ticket)
+        <div class="modal fade" id="assignModal-{{ $ticket->id }}" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel-{{ $ticket->id }}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form action="{{ route('tickets.assign', $ticket) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="assignModalLabel-{{ $ticket->id }}">Assegna Operatore</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <select name="operator_id" class="form-control">
+                                <option value="">Seleziona un operatore</option>
+                                @foreach (\App\Models\Operator::where('is_available', true)->get() as $operator)
+                                    <option value="{{ $operator->id }}">{{ $operator->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Assegna</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
 @endsection

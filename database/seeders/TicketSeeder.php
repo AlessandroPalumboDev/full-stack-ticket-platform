@@ -17,6 +17,12 @@ class TicketSeeder extends Seeder
         $operators = Operator::all();
         $categories = Category::all();
 
+        // Verifica che ci siano operatori e categorie disponibili
+        if ($operators->isEmpty() || $categories->isEmpty()) {
+            $this->command->error('Non ci sono operatori o categorie disponibili. Assicurati di eseguire OperatorSeeder e CategorySeeder prima.');
+            return;
+        }
+
         for ($i = 0; $i < 50; $i++) {
             Ticket::create([
                 'title' => $faker->sentence,
@@ -26,6 +32,7 @@ class TicketSeeder extends Seeder
                 'category_id' => $categories->random()->id,
             ]);
         }
+
+        $this->command->info('TicketSeeder completato con successo!');
     }
 }
-

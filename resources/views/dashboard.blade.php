@@ -16,7 +16,7 @@
                 </div>
                 <div class="card-body">
                     <p>Non hai ticket aperti al momento.</p>
-                    <a href="#" id="view-tickets" class="btn btn-primary">Visualizza ticket</a>
+                    <a href="{{ route('tickets.index') }}" class="btn btn-primary">Vai a ticket</a>
                 </div>
             </div>
         </div>
@@ -37,14 +37,4 @@
         </div>
     </div>
 </div>
-@push('scripts')
-<script>
-    document.getElementById('view-tickets').addEventListener('click', function(event) {
-        event.preventDefault(); // Evita che il link venga seguito
-        alert('Visualizza ticket cliccato!');
-        // Puoi aggiungere qui altre azioni come l'apertura di una modale, l'invio di una richiesta AJAX, ecc.
-    });
-</script>
-@endpush
-
 @endsection
