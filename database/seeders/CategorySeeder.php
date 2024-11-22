@@ -9,10 +9,26 @@ class CategorySeeder extends Seeder
 {
     public function run()
     {
-        $categories = ['Technical', 'Billing', 'General'];
+        // Elenco delle categorie
+        $categories = [
+            ['name' => 'Technical'],
+            ['name' => 'Billing'],
+            ['name' => 'General'],
+            ['name' => 'Support'],
+        ];
 
+        // Frequenza con cui le categorie devono apparire
+        $categoryFrequencies = [
+            'Technical' => 25,
+            'Billing' => 25,
+            'General' => 50,
+        ];
+
+        // Creazione delle categorie
         foreach ($categories as $category) {
-            Category::create(['name' => $category]);
+            Category::create($category);
         }
+
+        $this->command->info('CategorySeeder completato con successo!');
     }
 }

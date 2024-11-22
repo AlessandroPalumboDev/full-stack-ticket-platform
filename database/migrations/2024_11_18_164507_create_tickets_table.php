@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->enum('status', ['ASSIGNED', 'IN_PROGRESS', 'CLOSED'])->default('ASSIGNED');
+            $table->enum('status', ['ASSIGNED', 'IN_PROGRESS', 'CLOSED', 'NEW']);
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('operator_id')->constrained()->onDelete('cascade');
+            $table->foreignId('operator_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

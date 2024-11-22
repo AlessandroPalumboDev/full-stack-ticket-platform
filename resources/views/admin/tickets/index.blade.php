@@ -50,10 +50,13 @@
                     <td>{{ $ticket->operator ? $ticket->operator->name : 'Non assegnato' }}</td>
                     <td>
                         <a href="{{ route('tickets.show', $ticket) }}" class="btn btn-info btn-sm">Dettagli</a>
-                        <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#assignModal-{{ $ticket->id }}">
-                            Assegna Operatore
-                        </a>
                         @if ($ticket->status !== 'CLOSED')
+                            <a href="#" 
+                               class="btn btn-primary btn-sm" 
+                               data-toggle="modal" 
+                               data-target="#assignModal-{{ $ticket->id }}">
+                                {{ $ticket->status === 'IN_PROGRESS' ? 'Cambia Operatore' : 'Assegna Operatore' }}
+                            </a>
                             <form action="{{ route('tickets.status.update', $ticket) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('PATCH')
@@ -71,42 +74,48 @@
 
 </div>
 
-{{-- Modale Assegna Operatore --}}
+{{-- Modale Assegna/Cambia Operatore --}}
 @foreach ($tickets as $ticket)
-    <div class="modal fade" id="assignModal-{{ $ticket->id }}" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel-{{ $ticket->id }}">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form action="{{ route('tickets.assign', $ticket) }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="assignModalLabel-{{ $ticket->id }}">Assegna Operatore</h5>
-                        @if(session('error'))
-                            <script type="text/javascript">
-                                $(document).ready(function(){
-                                    $('#noOperatorsModal').modal('show');
-                                });
-                            </script>
-                        @endif
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <select name="operator_id" class="form-control">
-                            <option value="">Seleziona un operatore</option>
-                            @foreach (\App\Models\Operator::where('is_available', true)->get() as $operator)
-                                <option value="{{ $operator->id }}">{{ $operator->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Assegna</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
-                    </div>
-                </form>
+    @if ($ticket->status !== 'CLOSED')
+        <div class="modal fade" id="assignModal-{{ $ticket->id }}" tabindex="-1" role="dialog" aria-labelledby="assignModalLabel-{{ $ticket->id }}">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form action="{{ route('tickets.assign', $ticket) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="assignModalLabel-{{ $ticket->id }}">
+                                {{ $ticket->status === 'IN_PROGRESS' ? 'Cambia Operatore' : 'Assegna Operatore' }}
+                            </h5>
+                            @if(session('error'))
+                                <script type="text/javascript">
+                                    $(document).ready(function(){
+                                        $('#noOperatorsModal').modal('show');
+                                    });
+                                </script>
+                            @endif
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <select name="operator_id" class="form-control">
+                                <option value="">Seleziona un operatore</option>
+                                @foreach (\App\Models\Operator::where('is_available', true)->get() as $operator)
+                                    <option value="{{ $operator->id }}">{{ $operator->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">
+                                {{ $ticket->status === 'IN_PROGRESS' ? 'Cambia' : 'Assegna' }}
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Chiudi</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 @endforeach
 
 {{-- Modale per quando non ci sono operatori disponibili --}}

@@ -23,7 +23,23 @@ class TicketSeeder extends Seeder
             return;
         }
 
-        for ($i = 0; $i < 50; $i++) {
+        $totalTickets = 50; // Numero totale di ticket
+        $newTicketsCount = (int) ($totalTickets * 0.5); // Almeno il 50% dei ticket sarà "NEW"
+        $otherTicketsCount = $totalTickets - $newTicketsCount;
+
+        // Crea almeno il 50% di ticket con stato "NEW"
+        for ($i = 0; $i < $newTicketsCount; $i++) {
+            Ticket::create([
+                'title' => $faker->sentence,
+                'description' => $faker->paragraph,
+                'status' => 'NEW',
+                'operator_id' => null, // Nessun operatore assegnato ai nuovi ticket
+                'category_id' => $categories->random()->id,
+            ]);
+        }
+
+        // Crea il restante 50% con stati casuali
+        for ($i = 0; $i < $otherTicketsCount; $i++) {
             Ticket::create([
                 'title' => $faker->sentence,
                 'description' => $faker->paragraph,
