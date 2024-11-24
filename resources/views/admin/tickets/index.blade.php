@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-md-4">
                 <select name="status" class="form-control" onchange="this.form.submit()">
-                    <option value="">Filtra per stato</option>
+                    <option value="">Tutti gli stati</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
                             {{ $status }}
@@ -19,7 +19,7 @@
             </div>
             <div class="col-md-4">
                 <select name="category" class="form-control" onchange="this.form.submit()">
-                    <option value="">Filtra per categoria</option>
+                    <option value="">Tutte le categorie</option>
                     @foreach ($categories as $category)
                         <option value="{{ $category }}" {{ request('category') === $category ? 'selected' : '' }}>
                             {{ $category }}

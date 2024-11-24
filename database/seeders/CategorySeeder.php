@@ -11,17 +11,17 @@ class CategorySeeder extends Seeder
     {
         // Elenco delle categorie
         $categories = [
-            ['name' => 'Technical'],
-            ['name' => 'Billing'],
-            ['name' => 'General'],
+            ['name' => 'Bug'],
+            ['name' => 'Feature'],
+            // ['name' => 'General'],
             ['name' => 'Support'],
         ];
 
         // Frequenza con cui le categorie devono apparire
         $categoryFrequencies = [
-            'Technical' => 25,
-            'Billing' => 25,
-            'General' => 50,
+            'Bug' => 25,
+            'Feature' => 25,
+            'Support' => 25,
         ];
 
         // Creazione delle categorie

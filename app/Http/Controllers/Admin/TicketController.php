@@ -13,25 +13,28 @@ class TicketController extends Controller
     {
         $tickets = Ticket::query();
 
-        // Filtri per stato e categoria
+        // Filtro per stato
         if ($request->has('status') && $request->status) {
             $tickets->where('status', $request->status);
         }
 
+        // Filtro per nome della categoria
         if ($request->has('category') && $request->category) {
-            $tickets->where('category', $request->category);
+            $tickets->whereHas('category', function ($query) use ($request) {
+                $query->where('name', $request->category);
+            });
         }
 
         return view('admin.tickets.index', [
             'tickets' => $tickets->with('operator')->paginate(10),
             'statuses' => ['NEW', 'IN_PROGRESS', 'CLOSED'],
-            'categories' => ['Bug', 'Feature', 'Support'],
+            'categories' => ['Bug', 'Feature', 'Support'], // Aggiorna i nomi delle categorie se necessario
         ]);
     }
 
     public function show(Ticket $ticket)
     {
-        return view('admin.tickets.show', compact('ticket'));  // Assicurati che la view sia corretta
+        return view('admin.tickets.show', compact('ticket'));  
     }
 
     public function assignOperator(Ticket $ticket, Request $request)
