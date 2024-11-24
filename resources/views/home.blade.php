@@ -4,9 +4,16 @@
 <div class="container py-5">
     <!-- Hero Section -->
     <div class="jumbotron text-center bg-light p-5 rounded">
-        <h1 class="display-4">Benvenuto su <span >{{ config('app.name') }}</span>!</h1>
+        <h1 class="display-4">Benvenuto su <span>{{ config('app.name') }}</span>!</h1>
         <p class="lead">La tua piattaforma per gestire ticket di supporto in modo semplice e veloce.</p>
-        <a href="{{ route('dashboard') }}" class="text-white btn btn-outline-primary btn-lg mt-3">Vai alla Dashboard</a>
+        
+        @auth
+            <!-- Mostra il pulsante Vai ai Tickets se l'utente è loggato -->
+            <a href="{{ route('tickets.index') }}" class="text-white btn btn-outline-primary btn-lg mt-3">Vai ai Tickets</a>
+        @else
+            <!-- Mostra il pulsante Vai alla Dashboard se l'utente non è loggato -->
+            <a href="{{ route('dashboard') }}" class="text-white btn btn-outline-primary btn-lg mt-3">Vai alla Dashboard</a>
+        @endauth
     </div>
 
     <!-- Features Section -->
@@ -44,7 +51,12 @@
     <div class="mt-5 text-center">
         <h3>Inizia ora a organizzare il tuo supporto tecnico!</h3>
         <p class="text-muted">Con {{ config('app.name') }}, migliorare il tuo workflow non è mai stato così semplice.</p>
-        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg">Accedi alla Dashboard</a>
+        
+        @auth
+            <a href="{{ route('tickets.index') }}" class="btn btn-primary btn-lg">Vai ai Tickets</a>
+        @else
+            <a href="{{ route('dashboard') }}" class="btn btn-primary btn-lg">Accedi alla Dashboard</a>
+        @endauth
     </div>
 </div>
 @endsection
